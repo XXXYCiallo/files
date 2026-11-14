@@ -1,0 +1,67 @@
+name: Sync Upstream Releases
+
+on:
+  schedule:
+    - cron: '0 */8 * * *'   # 每 8 小时检查一次，可按需调整
+  workflow_dispatch:         # 允许在 Actions 页面手动触发
+
+permissions:
+  contents: write            # 必须有这个权限才能创建 Release
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync Bettbox
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          UPSTREAM_REPO="appshubcc/Bettbox"
+          LATEST=$(curl -s "https://api.github.com/repos/$UPSTREAM_REPO/releases/latest")
+          TAG=$(echo "$LATEST" | jq -r .tag_name)
+          echo "Bettbox 最新版本: $TAG"
+
+          mkdir -p assets/bettbox
+          for ASSET in $(echo "$LATEST" | jq -r '.assets[].name' | grep -E 'android-arm64-v8a|windows-amd64'); do
+            URL=$(echo "$LATEST" | jq -r --arg n "$ASSET" '.assets[] | select(.name==$n) | .browser_download_url')
+            echo "下载 $ASSET"
+            curl -L -o "assets/bettbox/$ASSET" "$URL"
+          done
+
+          OWNER_REPO="XXXYCiallo/files"
+          if gh release view "bettbox-$TAG" --repo "$OWNER_REPO" > /dev/null 2>&1; then
+            echo "Release bettbox-$TAG 已存在，跳过创建"
+          else
+            gh release create "bettbox-$TAG" assets/bettbox/* \
+              --repo "$OWNER_REPO" \
+              --title "Bettbox $TAG" \
+              --notes "自动同步自 $UPSTREAM_REPO @ $TAG"
+          fi
+
+      - name: Sync FlClash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          UPSTREAM_REPO="chen08209/FlClash"
+          LATEST=$(curl -s "https://api.github.com/repos/$UPSTREAM_REPO/releases/latest")
+          TAG=$(echo "$LATEST" | jq -r .tag_name)
+          echo "FlClash 最新版本: $TAG"
+
+          mkdir -p assets/flclash
+          for ASSET in $(echo "$LATEST" | jq -r '.assets[].name' | grep -E 'android-arm64-v8a|windows-amd64-setup'); do
+            URL=$(echo "$LATEST" | jq -r --arg n "$ASSET" '.assets[] | select(.name==$n) | .browser_download_url')
+            echo "下载 $ASSET"
+            curl -L -o "assets/flclash/$ASSET" "$URL"
+          done
+
+          OWNER_REPO="XXXYCiallo/files"
+          if gh release view "flclash-$TAG" --repo "$OWNER_REPO" > /dev/null 2>&1; then
+            echo "Release flclash-$TAG 已存在，跳过创建"
+          else
+            gh release create "flclash-$TAG" assets/flclash/* \
+              --repo "$OWNER_REPO" \
+              --title "FlClash $TAG" \
+              --notes "自动同步自 $UPSTREAM_REPO @ $TAG"
+          fi
