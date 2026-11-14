@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下载中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans p-6 md:p-12">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-3xl font-bold mb-2 text-center text-blue-600">📦 文件下载中心</h1>
+        <p class="text-center text-gray-500 mb-8">所有文件均自动从 GitHub 同步，并由 Cloudflare 加速</p>
+
+        <!-- Bettbox 区域 -->
+        <div class="bg-white rounded-lg shadow-md mb-6 p-6">
+            <h2 class="text-2xl font-semibold border-b pb-2 mb-4">Bettbox</h2>
+            <div id="bettbox-list" class="flex flex-col space-y-2">
+                <p class="text-gray-400 text-sm">加载中...</p>
+            </div>
+        </div>
+
+        <!-- FlClash 区域 -->
+        <div class="bg-white rounded-lg shadow-md mb-6 p-6">
+            <h2 class="text-2xl font-semibold border-b pb-2 mb-4">FlClash</h2>
+            <div id="flclash-list" class="flex flex-col space-y-2">
+                <p class="text-gray-400 text-sm">加载中...</p>
+            </div>
+        </div>
+
+        <!-- 纯文本区域 -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold border-b pb-2 mb-4">文本说明</h2>
+            <ul class="list-disc list-inside space-y-2">
+                <!-- 使用相对路径，文件需放在同目录下，target="_blank" 会在新标签页直接打开 -->
+                <li><a href="notes.txt" target="_blank" class="text-blue-500 hover:underline">内容物 notes.txt</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 你的 GitHub 仓库和自定义下载域名
+        const GITHUB_REPO = "XXXYCiallo/files"; 
+        const DOWNLOAD_DOMAIN = "https://xxxynya.dpdns.org"; 
+
+        async function fetchLatestRelease() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases`);
+                const releases = await response.json();
+
+                // 提取最新的 Bettbox 和 FlClash
+                const bettboxRelease = releases.find(r => r.tag_name.toLowerCase().includes('bettbox'));
+                const flclashRelease = releases.find(r => r.tag_name.toLowerCase().includes('flclash'));
+
+                renderAssets('bettbox-list', bettboxRelease);
+                renderAssets('flclash-list', flclashRelease);
+            } catch (error) {
+                console.error("获取版本信息失败", error);
+                document.getElementById('bettbox-list').innerHTML = '<p class="text-red-500">获取信息失败，请刷新重试</p>';
+                document.getElementById('flclash-list').innerHTML = '<p class="text-red-500">获取信息失败，请刷新重试</p>';
+            }
+        }
+
+        function renderAssets(containerId, release) {
+            const container = document.getElementById(containerId);
+            if (!release) {
+                container.innerHTML = '<p class="text-gray-500">暂无数据</p>';
+                return;
+            }
+
+            // 显示当前版本号
+            let html = `<p class="text-sm text-green-600 font-bold mb-2">最新版本：${release.tag_name}</p>`;
+            
+            // 遍历附件列表
+            release.assets.forEach(asset => {
+                // 匹配你需要的架构（V8 或 x64）
+                if (asset.name.includes('arm64-v8a') || asset.name.includes('amd64')) {
+                    // 把 GitHub 的下载路径替换成你绑定的 Worker 域名
+                    const downloadUrl = `${DOWNLOAD_DOMAIN}/${release.tag_name}/${asset.name}`;
+                    
+                    // 美化一下平台名称显示
+                    let platformName = asset.name.includes('arm64') ? 'Android (arm64-v8a)' : 'Windows (x64)';
+                    
+                    html += `
+                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded hover:bg-gray-100 transition">
+                            <span class="font-medium text-gray-700">${platformName}</span>
+                            <a href="${downloadUrl}" class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-4 rounded transition">下载</a>
+                        </div>
+                    `;
+                }
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // 页面加载完成后自动执行
+        fetchLatestRelease();
+    </script>
+</body>
+</html>
