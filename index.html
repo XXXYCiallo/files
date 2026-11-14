@@ -6,41 +6,41 @@
     <title>下载中心</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans p-6 md:p-12">
+<body class="bg-gray-900 text-gray-100 font-sans p-6 md:p-12 min-h-screen">
     <div class="max-w-3xl mx-auto">
-        <h1 class="text-3xl font-bold mb-2 text-center text-blue-600">📦 文件下载中心</h1>
-        <p class="text-center text-gray-500 mb-8">所有文件均自动从 GitHub 同步，并由 Cloudflare 加速</p>
+        <h1 class="text-3xl font-bold mb-2 text-center text-blue-400">📦 文件下载中心</h1>
+        <p class="text-center text-gray-400 mb-8">所有文件均自动从 GitHub 同步，并由 Cloudflare 加速</p>
 
         <!-- Bettbox 区域 -->
-        <div class="bg-white rounded-lg shadow-md mb-6 p-6">
-            <h2 class="text-2xl font-semibold border-b pb-2 mb-4">Bettbox</h2>
-            <div id="bettbox-list" class="flex flex-col space-y-2">
+        <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-6 p-6">
+            <h2 class="text-2xl font-semibold border-b border-gray-700 pb-2 mb-4 text-gray-200">Bettbox</h2>
+            <div id="bettbox-list" class="flex flex-col space-y-3">
                 <p class="text-gray-400 text-sm">加载中...</p>
             </div>
         </div>
 
         <!-- FlClash 区域 -->
-        <div class="bg-white rounded-lg shadow-md mb-6 p-6">
-            <h2 class="text-2xl font-semibold border-b pb-2 mb-4">FlClash</h2>
-            <div id="flclash-list" class="flex flex-col space-y-2">
+        <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-6 p-6">
+            <h2 class="text-2xl font-semibold border-b border-gray-700 pb-2 mb-4 text-gray-200">FlClash</h2>
+            <div id="flclash-list" class="flex flex-col space-y-3">
                 <p class="text-gray-400 text-sm">加载中...</p>
             </div>
         </div>
 
         <!-- 纯文本区域 -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-semibold border-b pb-2 mb-4">文本说明</h2>
-            <ul class="list-disc list-inside space-y-2">
-                <!-- 使用相对路径，文件需放在同目录下，target="_blank" 会在新标签页直接打开 -->
-                <li><a href="notes.txt" target="_blank" class="text-blue-500 hover:underline">内容物 notes.txt</a></li>
+        <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-6">
+            <h2 class="text-2xl font-semibold border-b border-gray-700 pb-2 mb-4 text-gray-200">文本说明</h2>
+            <ul class="list-disc list-inside space-y-2 text-gray-300">
+                <!-- 使用相对路径 -->
+                <li><a href="notes.txt" target="_blank" class="text-blue-400 hover:text-blue-300 hover:underline transition">内容物 notes.txt</a></li>
             </ul>
         </div>
     </div>
 
     <script>
-        // 你的 GitHub 仓库和自定义下载域名
+        // 你的 GitHub 仓库和正确的 Worker 下载域名
         const GITHUB_REPO = "XXXYCiallo/files"; 
-        const DOWNLOAD_DOMAIN = "https://xxxynya.dpdns.org"; 
+        const DOWNLOAD_DOMAIN = "https://files.xxxynya.dpdns.org"; 
 
         async function fetchLatestRelease() {
             try {
@@ -55,8 +55,8 @@
                 renderAssets('flclash-list', flclashRelease);
             } catch (error) {
                 console.error("获取版本信息失败", error);
-                document.getElementById('bettbox-list').innerHTML = '<p class="text-red-500">获取信息失败，请刷新重试</p>';
-                document.getElementById('flclash-list').innerHTML = '<p class="text-red-500">获取信息失败，请刷新重试</p>';
+                document.getElementById('bettbox-list').innerHTML = '<p class="text-red-400">获取信息失败，请刷新重试</p>';
+                document.getElementById('flclash-list').innerHTML = '<p class="text-red-400">获取信息失败，请刷新重试</p>';
             }
         }
 
@@ -68,7 +68,7 @@
             }
 
             // 显示当前版本号
-            let html = `<p class="text-sm text-green-600 font-bold mb-2">最新版本：${release.tag_name}</p>`;
+            let html = `<p class="text-sm text-green-400 font-bold mb-2">最新版本：${release.tag_name}</p>`;
             
             // 遍历附件列表
             release.assets.forEach(asset => {
@@ -81,9 +81,9 @@
                     let platformName = asset.name.includes('arm64') ? 'Android (arm64-v8a)' : 'Windows (x64)';
                     
                     html += `
-                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded hover:bg-gray-100 transition">
-                            <span class="font-medium text-gray-700">${platformName}</span>
-                            <a href="${downloadUrl}" class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-4 rounded transition">下载</a>
+                        <div class="flex items-center justify-between bg-gray-700 p-4 rounded-lg hover:bg-gray-600 transition duration-200 shadow-sm">
+                            <span class="font-medium text-gray-100">${platformName}</span>
+                            <a href="${downloadUrl}" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-1.5 px-5 rounded transition shadow-md">下载</a>
                         </div>
                     `;
                 }
